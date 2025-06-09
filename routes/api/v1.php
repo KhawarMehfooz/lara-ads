@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AdController;
 use App\Http\Controllers\V1\CategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
@@ -25,5 +26,10 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword'])
 
 // category routes
 
-Route::get('/categories',[CategoryController::class, 'index'])->name('categories.index');
+Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 
+// ad routes
+Route::get('/ads', [AdController::class, 'index'])->name('ads.index');
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/ads', [AdController::class, 'store'])->name('ads.store');
+});

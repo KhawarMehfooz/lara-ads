@@ -2,8 +2,7 @@
 
 namespace App\Providers;
 
-use App\Models\Category;
-use App\Observers\CategoryObserver;
+
 use Dedoc\Scramble\Scramble;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,6 +21,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Category::observe(CategoryObserver::class);
+
     }
 }

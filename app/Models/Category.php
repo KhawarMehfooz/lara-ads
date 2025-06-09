@@ -21,4 +21,8 @@ class Category extends Model
             ]
         ];
     }
+
+    public function ads(){
+        return $this->hasMany(Ad::class);
+    }
 }
