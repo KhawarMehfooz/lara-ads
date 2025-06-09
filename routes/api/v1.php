@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\V1\CategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
 
@@ -21,4 +22,8 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])
     ->middleware('guest')
     ->name('password.update');
+
+// category routes
+
+Route::get('/categories',[CategoryController::class, 'index'])->name('categories.index');
 
