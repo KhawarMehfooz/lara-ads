@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AdController;
-use App\Http\Controllers\V1\CategoryController;
+use App\Http\Controllers\Api\V1\CategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
 

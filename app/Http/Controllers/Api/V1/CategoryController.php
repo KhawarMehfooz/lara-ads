@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\V1;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\CategoryResource;
@@ -11,10 +11,8 @@ class CategoryController extends Controller
 {
     /**
      * Get Categories
-     * @param \Illuminate\Http\Request $request
-     * @return CategoryResource
      */
-    public function index(Request $request){
+    public function index(){
         $categories = Category::paginate(10);
         return  CategoryResource::collection($categories);
     }
