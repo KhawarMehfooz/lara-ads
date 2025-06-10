@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\AdResource;
+use App\Http\Resources\V1\AdResource;
 use App\Models\Ad;
 use Illuminate\Http\Request;
-use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class AdController extends Controller
 {
