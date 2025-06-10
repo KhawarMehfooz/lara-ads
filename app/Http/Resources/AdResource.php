@@ -32,7 +32,7 @@ class AdResource extends JsonResource
             'gallery' => $this->images->where('type', 'gallery')->map(function ($image) {
                 return asset('storage/' . $image->path);
             })->values(),
-            'created_at' => $this->created_at->toDateTimeString(),
+            'created_at' => $this->created_at?->toDateTimeString(),
         ];
 
     }

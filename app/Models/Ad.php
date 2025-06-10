@@ -26,6 +26,10 @@ class Ad extends Model
         'is_active'
     ];
 
+    public function getRouteKeyName(){
+        return 'slug';
+    }
+
     public function sluggable(): array
     {
         return [

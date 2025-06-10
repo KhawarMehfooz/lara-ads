@@ -30,6 +30,7 @@ Route::get('/categories', [CategoryController::class, 'index'])->name('categorie
 
 // ad routes
 Route::get('/ads', [AdController::class, 'index'])->name('ads.index');
+Route::get('/ads/{ad}', [AdController::class, 'show'])->name('ads.show');
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/ads', [AdController::class, 'store'])->name('ads.store');
 });

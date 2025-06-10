@@ -27,7 +27,8 @@ class AdFactory extends Factory
             'price'=>$this->faker->randomFloat(1,20,1000),
             'contact_email'=>$this->faker->safeEmail(),
             'contact_phone'=>$this->faker->phoneNumber(),
-            'is_active'=>true
+            'is_active'=>true,
+            'created_at'=>now()
         ];
     }
 }

@@ -129,11 +129,11 @@ class AdController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Get Single Ad
      */
     public function show(Ad $ad)
     {
-        //
+        return new AdResource($ad->load(['category','user','images']));
     }
 
     /**
