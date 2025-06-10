@@ -15,11 +15,42 @@ class AdController extends Controller
     /**
      * Get Ads
      */
-    public function index()
+    public function index(Request $request)
     {
-        $ads = Ad::with(['category', 'user'])->paginate(10);
-        return AdResource::collection($ads);
+        $query = Ad::with(['category', 'user', 'images'])->latest();
+
+        // Search
+        if ($request->filled('q')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->q . '%')
+                    ->orWhere('description', 'like', '%' . $request->q . '%');
+            });
+        }
+
+        // Filters
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        if ($request->filled('location')) {
+            $query->where('location', 'like', '%' . $request->location . '%');
+        }
+
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        if ($request->has('is_active')) {
+            $query->where('is_active', (bool) $request->is_active);
+        }
+
+        return AdResource::collection($query->paginate(10));
     }
+
 
     /**
      * Show the form for creating a new resource.

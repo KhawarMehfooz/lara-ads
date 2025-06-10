@@ -38,7 +38,7 @@ it('creates an ad successfully with thumbnail and gallery images', function () {
         ->post(route('ads.store'), $payload);
 
     $response->assertCreated();
-    $response->assertJsonFragment(['title' => 'Test Ad']);
+    $response->assertJsonFragment(['message' => 'Ad created successfully.']);
 
     $this->assertDatabaseHas('ads', [
         'title' => 'Test Ad',
