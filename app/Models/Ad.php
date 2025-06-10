@@ -5,6 +5,9 @@ namespace App\Models;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Ad extends Model
 {
@@ -32,13 +35,28 @@ class Ad extends Model
         ];
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function category()
+    public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(AdImage::class);
+    }
+
+    public function thumbnail(): HasOne
+    {
+        return $this->hasOne(AdImage::class)->where('type', 'thumbnail');
+    }
+
+    public function gallery(): HasMany
+    {
+        return $this->hasMany(AdImage::class)->where('type', 'gallery');
     }
 }

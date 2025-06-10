@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\AdResource;
 use App\Models\Ad;
 use Illuminate\Http\Request;
+use Illuminate\Log\Logger;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class AdController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Get Ads
      */
     public function index()
     {
@@ -28,7 +30,7 @@ class AdController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Create Ad
      */
     public function store(Request $request)
     {
@@ -41,24 +43,58 @@ class AdController extends Controller
             'contact_phone' => 'required|string|max:20',
             'price' => 'required|numeric|min:0',
             'is_active' => 'sometimes|boolean',
+            'thumbnail' => 'required|image|max:4096',
+            'gallery' => 'nullable|array',
+            'gallery.*' => 'image|max:4096'
         ]);
 
-        $ad = Ad::create([
-            'user_id' => $request->user()->id,
-            'category_id' => $validated['category_id'],
-            'title' => $validated['title'],
-            'description' => $validated['description'] ?? null,
-            'location' => $validated['location'],
-            'contact_email' => $validated['contact_email'],
-            'contact_phone' => $validated['contact_phone'],
-            'price' => $validated['price'],
-            'is_active' => $validated['is_active'] ?? true,
-        ]);
+        \Log::info('Ad created', $validated);
+        DB::beginTransaction();
 
-        return response()->json([
-            'message' => 'Ad created successfully.',
-            'data' => $ad,
-        ], 201);
+        try {
+
+            $ad = Ad::create([
+                'user_id' => $request->user()->id,
+                'category_id' => $validated['category_id'],
+                'title' => $validated['title'],
+                'description' => $validated['description'] ?? null,
+                'location' => $validated['location'],
+                'contact_email' => $validated['contact_email'],
+                'contact_phone' => $validated['contact_phone'],
+                'price' => $validated['price'],
+                'is_active' => $validated['is_active'] ?? true,
+            ]);
+
+            if ($request->hasFile('thumbnail')) {
+                $thumbnail_path = $request->file('thumbnail')->store('ads/thumbnails', 'public');
+                $ad->images()->create([
+                    'path' => $thumbnail_path,
+                    'type' => 'thumbnail'
+                ]);
+            }
+
+            if ($request->hasFile('gallery')) {
+                foreach ($request->file('gallery') as $index => $image) {
+                    $gallery_path = $image->store('ads/gallery', 'public');
+                    $ad->images()->create([
+                        'path' => $gallery_path,
+                        'type' => 'gallery'
+                    ]);
+                }
+            }
+            DB::commit();
+
+
+
+            return response()->json([
+                'message' => 'Ad created successfully.',
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Failed to create ad', 'error' => $e->getMessage()], 500);
+        }
+
     }
 
     /**
