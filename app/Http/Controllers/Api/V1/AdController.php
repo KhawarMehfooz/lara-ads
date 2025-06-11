@@ -226,10 +226,33 @@ class AdController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Delete Ad
      */
     public function destroy(Ad $ad)
     {
-        //
+        $this->authorize('delete', $ad);
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($ad->images as $image) {
+                Storage::disk('public')->delete($image->path);
+                $image->delete();
+            }
+
+            $ad->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Ad deleted successfully.'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to delete ad',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

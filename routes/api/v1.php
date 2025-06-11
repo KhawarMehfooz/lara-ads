@@ -34,4 +34,5 @@ Route::get('/ads/{ad}', [AdController::class, 'show'])->name('ads.show');
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/ads', [AdController::class, 'store'])->name('ads.store');
     Route::put('/ads/{ad}', [AdController::class, 'update'])->name('ads.update');
+    Route::delete('/ads/{ad}', [AdController::class, 'destroy'])->name('ads.destroy');
 });
