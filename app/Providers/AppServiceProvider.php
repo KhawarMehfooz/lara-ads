@@ -3,7 +3,10 @@
 namespace App\Providers;
 
 
+use App\Models\Ad;
+use App\Policies\AdPolicy;
 use Dedoc\Scramble\Scramble;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,6 +24,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
+        Gate::policy(Ad::class,AdPolicy::class);
     }
 }

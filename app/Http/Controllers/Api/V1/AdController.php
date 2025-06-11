@@ -5,11 +5,15 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\AdResource;
 use App\Models\Ad;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class AdController extends Controller
 {
+
+    use AuthorizesRequests;
     /**
      * Get Ads
      */
@@ -113,8 +117,6 @@ class AdController extends Controller
             }
             DB::commit();
 
-
-
             return response()->json([
                 'message' => 'Ad created successfully.',
             ], 201);
@@ -131,7 +133,7 @@ class AdController extends Controller
      */
     public function show(Ad $ad)
     {
-        return new AdResource($ad->load(['category','user','images']));
+        return new AdResource($ad->load(['category', 'user', 'images']));
     }
 
     /**
@@ -143,11 +145,84 @@ class AdController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update Ad
      */
     public function update(Request $request, Ad $ad)
     {
-        //
+        $this->authorize('update', $ad);
+
+
+        $validated = $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'location' => 'required|string|max:255',
+            'contact_email' => 'required|email',
+            'contact_phone' => 'required|string|max:20',
+            'price' => 'required|numeric|min:0',
+            'is_active' => 'sometimes|boolean',
+            'thumbnail' => 'nullable|image|max:4096',
+            'gallery' => 'nullable|array',
+            'gallery.*' => 'image|max:4096',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $ad->update([
+                'category_id' => $validated['category_id'],
+                'title' => $validated['title'],
+                'description' => $validated['description'] ?? null,
+                'location' => $validated['location'],
+                'contact_email' => $validated['contact_email'],
+                'contact_phone' => $validated['contact_phone'],
+                'price' => $validated['price'],
+                'is_active' => $validated['is_active'] ?? $ad->is_active,
+            ]);
+
+            if ($request->hasFile('thumbnail')) {
+                // Remove old thumbnail
+                $ad->images()->where('type', 'thumbnail')->each(function ($image) {
+                    Storage::disk('public')->delete($image->path);
+                    $image->delete();
+                });
+
+                $thumbnailPath = $request->file('thumbnail')->store('ads/thumbnails', 'public');
+                $ad->images()->create([
+                    'path' => $thumbnailPath,
+                    'type' => 'thumbnail',
+                ]);
+            }
+
+            if ($request->hasFile('gallery')) {
+                // remove old gallery images
+                $ad->images()->where('type', 'gallery')->each(function ($image) {
+                    Storage::disk('public')->delete($image->path);
+                    $image->delete();
+                });
+
+                foreach ($request->file('gallery') as $image) {
+                    $galleryPath = $image->store('ads/gallery', 'public');
+                    $ad->images()->create([
+                        'path' => $galleryPath,
+                        'type' => 'gallery',
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Ad updated successfully.',
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to update ad',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
